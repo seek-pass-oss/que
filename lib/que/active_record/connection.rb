@@ -63,9 +63,9 @@ module Que
             # see https://github.com/que-rb/que/pull/393
             return if job.class.resolve_que_setting(:run_synchronously)
 
-            # don't clear connections in nested jobs,
-            # i.e. clear only if this is the outermost instance of
-            # Que::ActiveRecord::Connection::JobMiddleware
+            # don't clear connections in nested jobs executed synchronously
+            # i.e. while we're still inside of the rails executor
+            # see https://github.com/que-rb/que/pull/412#issuecomment-2194412783
             return if Que::ActiveRecord.active_rails_executor?
 
             if ::ActiveRecord.version >= Gem::Version.new('7.1')

@@ -33,7 +33,7 @@ module Que
     }
 
   class Locker
-    attr_reader :thread, :workers, :job_buffer, :locks, :queues, :poll_interval, :poll_interval_variance
+    attr_reader :thread, :workers, :job_buffer, :locks, :queues, :poll_interval, :poll_interval_variance, :repoll_minimum_delay
 
     MESSAGE_RESOLVERS = {}
     RESULT_RESOLVERS  = {}
@@ -49,6 +49,7 @@ module Que
 
     DEFAULT_POLL_INTERVAL          = 5.0
     DEFAULT_POLL_INTERVAL_VARIANCE = 0.0
+    DEFAULT_REPOLL_MINIMUM_DELAY   = 0.0
     DEFAULT_WAIT_PERIOD            = 50
     DEFAULT_MAXIMUM_BUFFER_SIZE    = 8
     DEFAULT_WORKER_PRIORITIES      = [10, 30, 50, nil, nil, nil].freeze
@@ -60,6 +61,7 @@ module Que
       poll:                   true,
       poll_interval:          DEFAULT_POLL_INTERVAL,
       poll_interval_variance: DEFAULT_POLL_INTERVAL_VARIANCE,
+      repoll_minimum_delay:   DEFAULT_REPOLL_MINIMUM_DELAY,
       wait_period:            DEFAULT_WAIT_PERIOD,
       maximum_buffer_size:    DEFAULT_MAXIMUM_BUFFER_SIZE,
       worker_priorities:      DEFAULT_WORKER_PRIORITIES,
@@ -74,6 +76,7 @@ module Que
 
       Que.assert Numeric, poll_interval
       Que.assert Numeric, poll_interval_variance
+      Que.assert Numeric, repoll_minimum_delay
       Que.assert Numeric, wait_period
 
       Que.assert Array, worker_priorities
@@ -102,6 +105,7 @@ module Que
           poll:                   poll,
           poll_interval:          poll_interval,
           poll_interval_variance: poll_interval_variance,
+          repoll_minimum_delay:   repoll_minimum_delay,
           wait_period:            wait_period,
           maximum_buffer_size:    maximum_buffer_size,
           worker_priorities:      worker_priorities,
@@ -113,6 +117,7 @@ module Que
 
       @poll_interval = poll_interval
       @poll_interval_variance = poll_interval_variance
+      @repoll_minimum_delay = repoll_minimum_delay
 
       if queues.is_a?(Hash)
         @queue_names = queues.keys
@@ -213,6 +218,7 @@ module Que
                     queue:                  queue_name,
                     poll_interval:          interval,
                     poll_interval_variance: poll_interval_variance,
+                    repoll_minimum_delay:   repoll_minimum_delay,
                   )
                 end
               end

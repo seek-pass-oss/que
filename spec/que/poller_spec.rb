@@ -45,6 +45,7 @@ describe Que::Poller do
         queue: queue_name,
         poll_interval: 5,
         poll_interval_variance: 0,
+        repoll_minimum_delay: 0,
       )
 
     Que::Poller.setup(override_connection || connection)
@@ -247,7 +248,12 @@ describe Que::Poller do
         queue: 'default',
         poll_interval: 5,
         poll_interval_variance: 0,
+        repoll_minimum_delay: ,
       )
+    end
+
+    let :repoll_minimum_delay do
+      0.0
     end
 
     before { Que::Poller.setup  (connection) }
@@ -266,6 +272,36 @@ describe Que::Poller do
 
       assert_equal true, poller.should_poll?
     end
+
+    describe "with a repoll_minimum_delay set" do
+      let :repoll_minimum_delay do
+        3.0
+      end
+
+      it "should be false if the minimum repoll delay has not elapsed" do
+        job_ids_p10 = 5.times.map { Que::Job.enqueue(job_options: { priority: 10 }).que_attrs[:id] }
+        job_ids_p20 = 2.times.map { Que::Job.enqueue(job_options: { priority: 20 }).que_attrs[:id] }
+
+        result = poller.poll(priorities: { 10 => 6, 20 => 7 }, held_locks: Set.new)
+        assert_equal (job_ids_p10 + job_ids_p20), result.map(&:id)
+
+        Timecop.freeze(Time.now + 1) do
+          assert_equal false, poller.should_poll?
+        end
+      end
+
+      it "should be true if the minimum repoll delay has elapsed" do
+        job_ids_p10 = 5.times.map { Que::Job.enqueue(job_options: { priority: 10 }).que_attrs[:id] }
+        job_ids_p20 = 2.times.map { Que::Job.enqueue(job_options: { priority: 20 }).que_attrs[:id] }
+
+        result = poller.poll(priorities: { 10 => 6, 20 => 7 }, held_locks: Set.new)
+        assert_equal (job_ids_p10 + job_ids_p20), result.map(&:id)
+
+        Timecop.freeze(Time.now + 4) do
+          assert_equal true, poller.should_poll?
+        end
+      end
+  end
 
     it "should be false if the number of jobs returned from the last poll was less than the lowest priority request" do
       job_ids_p10 = 5.times.map { Que::Job.enqueue(job_options: { priority: 10 }).que_attrs[:id] }

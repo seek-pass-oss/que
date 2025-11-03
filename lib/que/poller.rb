@@ -117,6 +117,7 @@ module Que
       :queue,
       :poll_interval,
       :poll_interval_variance,
+      :repoll_minimum_delay,
       :last_polled_at,
       :last_poll_satisfied,
       :next_poll_at
@@ -125,12 +126,14 @@ module Que
       connection:,
       queue:,
       poll_interval:,
-      poll_interval_variance:
+      poll_interval_variance:,
+      repoll_minimum_delay:
     )
       @connection             = connection
       @queue                  = queue
       @poll_interval          = poll_interval
       @poll_interval_variance = poll_interval_variance
+      @repoll_minimum_delay   = repoll_minimum_delay
 
       @last_polled_at      = nil
       @last_poll_satisfied = nil
@@ -142,6 +145,7 @@ module Que
           queue:                  queue,
           poll_interval:          poll_interval,
           poll_interval_variance: poll_interval_variance,
+          repoll_minimum_delay:   repoll_minimum_delay,
         }
       end
     end
@@ -191,10 +195,10 @@ module Que
 
       # Never polled before?
       last_poll_satisfied.nil? ||
-      # Plenty of jobs were available last time?
-      last_poll_satisfied == true ||
       # It's due time to poll again regardless of the last poll's results?
-      next_poll_at < Time.now
+      next_poll_at < Time.now ||
+      # Plenty of jobs were available last time?
+      (last_poll_satisfied == true && last_polled_at + repoll_minimum_delay < Time.now)
     end
 
     class << self

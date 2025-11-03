@@ -90,7 +90,7 @@ describe Que::Poller do
 
   it "should skip jobs in the wrong queue" do
     one = Que::Job.enqueue(job_options: { queue: 'one' }).que_attrs[:id]
-    _two = Que::Job.enqueue(job_options: { queue: 'two' }).que_attrs[:id]
+    two = Que::Job.enqueue(job_options: { queue: 'two' }).que_attrs[:id]
 
     assert_equal [one], poll(queue_name: 'one')
   end
@@ -115,7 +115,7 @@ describe Que::Poller do
 
   it "should skip jobs that don't meet the priority requirements" do
     one = Que::Job.enqueue(job_options: { priority: 7 }).que_attrs[:id]
-    _two = Que::Job.enqueue(job_options: { priority: 8 }).que_attrs[:id]
+    two = Que::Job.enqueue(job_options: { priority: 8 }).que_attrs[:id]
 
     assert_equal [one], poll(priorities: {7 => 5})
   end
@@ -154,9 +154,9 @@ describe Que::Poller do
   end
 
   it "should only work a job whose scheduled time to run has passed" do
-    _future1 = Que::Job.enqueue(job_options: { run_at: Time.now + 30 }).que_attrs[:id]
+    future1 = Que::Job.enqueue(job_options: { run_at: Time.now + 30 }).que_attrs[:id]
     past    = Que::Job.enqueue(job_options: { run_at: Time.now - 30 }).que_attrs[:id]
-    _future2 = Que::Job.enqueue(job_options: { run_at: Time.now + 30 }).que_attrs[:id]
+    future2 = Que::Job.enqueue(job_options: { run_at: Time.now + 30 }).que_attrs[:id]
 
     assert_equal [past], poll
   end
@@ -172,9 +172,9 @@ describe Que::Poller do
   end
 
   it "should prefer a job that was scheduled to run longer ago" do
-    _id1 = Que::Job.enqueue(job_options: { run_at: Time.now - 30 }).que_attrs[:id]
+    id1 = Que::Job.enqueue(job_options: { run_at: Time.now - 30 }).que_attrs[:id]
     id2 = Que::Job.enqueue(job_options: { run_at: Time.now - 60 }).que_attrs[:id]
-    _id3 = Que::Job.enqueue(job_options: { run_at: Time.now - 30 }).que_attrs[:id]
+    id3 = Que::Job.enqueue(job_options: { run_at: Time.now - 30 }).que_attrs[:id]
 
     assert_equal [id2], poll(priorities: {200 => 1})
   end
@@ -182,7 +182,7 @@ describe Que::Poller do
   it "should prefer a job that was queued earlier" do
     run_at = Time.now - 30
 
-    a, b, _c = 3.times.map { Que::Job.enqueue(job_options: { run_at: run_at }).que_attrs[:id] }
+    a, b, c = 3.times.map { Que::Job.enqueue(job_options: { run_at: run_at }).que_attrs[:id] }
 
     assert_equal [a, b], poll(priorities: {200 => 2})
   end

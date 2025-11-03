@@ -24,6 +24,7 @@ module Que
         log_internals          = false
         poll_interval          = 5
         poll_interval_variance = 0
+        repoll_minimum_delay   = 0
         connection_url         = nil
         worker_count           = nil
         worker_priorities      = nil
@@ -58,6 +59,15 @@ module Que
               "Set maximum variance in poll interval, in seconds (default: 0)",
             ) do |j|
               poll_interval_variance = j.to_f
+            end
+
+            opts.on(
+              '-j',
+              '--repoll-minimum-delay [INTERVAL]',
+              Float,
+              "Set minimum delay between repolling for jobs within poll interval, in seconds (default: 0)",
+            ) do |j|
+              repoll_minimum_delay = j.to_f
             end
 
             opts.on(
@@ -244,6 +254,7 @@ OUTPUT
 
         options[:poll_interval]          = poll_interval
         options[:poll_interval_variance] = poll_interval_variance
+        options[:repoll_minimum_delay]   = repoll_minimum_delay
 
         locker =
           begin

@@ -6,6 +6,7 @@
   - [`worker-priorities` and `worker-count`](#worker-priorities-and-worker-count)
   - [`poll-interval`](#poll-interval)
   - [`maximum-buffer-size`](#maximum-buffer-size)
+  - [`repoll-minimum-delay`](#repoll-minimum-delay)
   - [`connection-url`](#connection-url)
   - [`wait-period`](#wait-period)
   - [`log-internals`](#log-internals)
@@ -95,6 +96,10 @@ This option sets the number of seconds the process will wait between polls of th
 ### `maximum-buffer-size`
 
 This option sets the size of the internal buffer that Que uses to hold jobs until they're ready for workers. The default maximum is 8, meaning that the process won't buffer more than 8 jobs that aren't yet ready to be worked. If you don't want jobs to be buffered at all, you can set this value to zero.
+
+### `repoll-minimum-delay`
+
+This option sets the number of seconds the process will wait between repolls of the job queue. Repolling occurs when there are more jobs returned from polls of the job queue than can be held in the internal buffer. You shouldn't generally need to tweak this, but it may come in handy if repolling is happening more frequently than you'd like. The default is 0 seconds.
 
 ### `connection-url`
 

@@ -323,18 +323,5 @@ describe Que::Poller do
         assert_equal true, poller.should_poll?
       end
     end
-
-    describe "with a repoll_minimum_delay set" do
-      let(:repoll_minimum_delay) { 2.0 }
-
-      it "should be false if the repoll_minimum_delay hasn't elapsed since the last poll" do
-
-
-      end
-
-      # it "should be true if the repoll_minimum_delay has elapsed since the last poll" do
-
-
-    end
   end
 end

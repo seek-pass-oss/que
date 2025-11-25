@@ -18,16 +18,16 @@ module Que
         default_require_file: RAILS_ENVIRONMENT_FILE
       )
 
-        options                             = {}
-        queues                              = []
-        log_level                           = 'info'
-        log_internals                       = false
-        poll_interval                       = 5
-        poll_interval_variance              = 0
-        poll_buffer_fullness_skip_threshold = 1.0
-        connection_url                      = nil
-        worker_count                        = nil
-        worker_priorities                   = nil
+        options                               = {}
+        queues                                = []
+        log_level                             = 'info'
+        log_internals                         = false
+        poll_interval                         = 5
+        poll_interval_variance                = 0
+        skip_poll_when_buffer_above_threshold = 1.0
+        connection_url                        = nil
+        worker_count                          = nil
+        worker_priorities                     = nil
 
         parser =
           OptionParser.new do |opts|
@@ -62,11 +62,11 @@ module Que
             end
 
             opts.on(
-              '--poll-buffer-fullness-skip-threshold [THRESHOLD]',
+              '--skip-poll-when-buffer-above-threshold [THRESHOLD]',
               Float,
               "Set threshold for skipping polls based on buffer fullness (default: 1.0)",
             ) do |threshold|
-              poll_buffer_fullness_skip_threshold = threshold
+              skip_poll_when_buffer_above_threshold = threshold
             end
 
             opts.on(
@@ -251,9 +251,9 @@ OUTPUT
           options[:queues] = queues_hash
         end
 
-        options[:poll_interval]          = poll_interval
-        options[:poll_interval_variance] = poll_interval_variance
-        options[:poll_buffer_fullness_skip_threshold] = poll_buffer_fullness_skip_threshold
+        options[:poll_interval]                          = poll_interval
+        options[:poll_interval_variance]                 = poll_interval_variance
+        options[:skip_poll_when_buffer_above_threshold]  = skip_poll_when_buffer_above_threshold
 
         locker =
           begin

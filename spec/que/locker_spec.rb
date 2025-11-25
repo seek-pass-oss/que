@@ -435,7 +435,7 @@ describe Que::Locker do
       
       locker_settings[:worker_priorities] = [100, 100, 100]
       locker_settings[:maximum_buffer_size] = 8
-      locker_settings[:poll_buffer_fullness_skip_threshold] = 0.75
+      locker_settings[:skip_poll_when_buffer_above_threshold] = 0.75
 
       locker
       3.times { $q1.pop }

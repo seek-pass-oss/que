@@ -18,14 +18,15 @@ module Que
         default_require_file: RAILS_ENVIRONMENT_FILE
       )
 
-        options           = {}
-        queues            = []
-        log_level         = 'info'
-        log_internals     = false
-        poll_interval     = 5
-        connection_url    = nil
-        worker_count      = nil
-        worker_priorities = nil
+        options                             = {}
+        queues                              = []
+        log_level                           = 'info'
+        log_internals                       = false
+        poll_interval                       = 5
+        poll_buffer_fullness_skip_threshold = 1.0
+        connection_url                      = nil
+        worker_count                        = nil
+        worker_priorities                   = nil
 
         parser =
           OptionParser.new do |opts|
@@ -48,6 +49,14 @@ module Que
                 "in seconds (default: 5)",
             ) do |i|
               poll_interval = i
+            end
+
+            opts.on(
+              '--poll-buffer-fullness-skip-threshold [THRESHOLD]',
+              Float,
+              "Set threshold for skipping polls based on buffer fullness (default: 1.0)",
+            ) do |threshold|
+              poll_buffer_fullness_skip_threshold = threshold
             end
 
             opts.on(
@@ -233,6 +242,7 @@ OUTPUT
         end
 
         options[:poll_interval] = poll_interval
+        options[:poll_buffer_fullness_skip_threshold] = poll_buffer_fullness_skip_threshold
 
         locker =
           begin
